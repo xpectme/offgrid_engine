@@ -1,0 +1,17 @@
+{
+  "tasks": {
+    "bundle": "deno bundle -c deno.jsonc main.ts dest/offgrid_engine.js",
+    "watch": "deno bundle -c deno.jsonc --watch main.ts dest/offgrid_engine.js"
+  },
+  "compilerOptions": {
+    "allowJs": true,
+    "strict": false,
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "dom.asynciterable",
+      "deno.ns",
+      "deno.unstable"
+    ]
+  }
+}
