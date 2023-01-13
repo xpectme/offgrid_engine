@@ -9,7 +9,8 @@ export interface ViewEngineOptions {
 
 export interface ViewEngineSetup {
   fetch?: ViewEngineFetch;
-  partials: string[];
+  partials?: string[];
+  helpers?: Record<string, (...args: unknown[]) => void>;
 }
 
 export type ViewEngineFetch = (
@@ -35,7 +36,10 @@ export abstract class ViewEngine<Engine = any> {
     return `${this.viewPath}/${this.options.layoutPath}`;
   }
 
-  constructor(readonly engine: Engine, options: Partial<ViewEngineOptions>) {
+  constructor(
+    readonly engine: Engine,
+    options: Partial<ViewEngineOptions> = {},
+  ) {
     this.options = {
       rootPath: ".",
       viewPath: "views",
@@ -62,6 +66,7 @@ export abstract class ViewEngine<Engine = any> {
   }
 
   abstract registerPartial(partial: string): Promise<void>;
+  abstract registerHelper(name: string, fn: (...args: unknown[]) => void): void;
 
   abstract view(
     template: string,
