@@ -24,18 +24,6 @@ export abstract class ViewEngine<Engine = any> {
 
   fetch!: ViewEngineFetch;
 
-  get viewPath(): string {
-    return `${this.options.rootPath}/${this.options.viewPath}`;
-  }
-
-  get partialPath(): string {
-    return `${this.viewPath}/${this.options.partialPath}`;
-  }
-
-  get layoutPath(): string {
-    return `${this.viewPath}/${this.options.layoutPath}`;
-  }
-
   constructor(
     readonly engine: Engine,
     options: Partial<ViewEngineOptions> = {},
@@ -49,6 +37,22 @@ export abstract class ViewEngine<Engine = any> {
       layout: "main",
       ...options,
     };
+  }
+
+  getViewPath(options?: Partial<ViewEngineOptions>) {
+    const rootPath = options?.rootPath || this.options.rootPath;
+    const viewPath = options?.viewPath || this.options.viewPath;
+    return `${rootPath}/${viewPath}`;
+  }
+
+  getPartialPath(options?: Partial<ViewEngineOptions>) {
+    const partialPath = options?.partialPath || this.options.partialPath;
+    return `${this.getViewPath(options)}/${partialPath}`;
+  }
+
+  getLayoutPath(options?: Partial<ViewEngineOptions>) {
+    const layoutPath = options?.layoutPath || this.options.layoutPath;
+    return `${this.getViewPath(options)}/${layoutPath}`;
   }
 
   async install(setup: ViewEngineSetup) {
@@ -78,4 +82,42 @@ export abstract class ViewEngine<Engine = any> {
     data: Record<string, unknown>,
     options?: Partial<ViewEngineOptions>,
   ): Promise<string>;
+
+  protected async getTemplate(
+    path: string,
+    template: string,
+    options?: Partial<ViewEngineOptions>,
+  ) {
+    const extName = options?.extName || this.options.extName;
+    const res = await this.fetch(`${path}/${template + extName}`);
+    const content = await res.text();
+    return content;
+  }
+
+  protected async getViewTemplate(
+    template: string,
+    options?: Partial<ViewEngineOptions>,
+  ) {
+    const path = this.getViewPath(options);
+    const content = await this.getTemplate(path, template, options);
+    return content;
+  }
+
+  protected async getPartialTemplate(
+    template: string,
+    options?: Partial<ViewEngineOptions>,
+  ) {
+    const path = this.getPartialPath(options);
+    const content = await this.getTemplate(path, template, options);
+    return content;
+  }
+
+  protected async getLayoutTemplate(
+    template: string,
+    options?: Partial<ViewEngineOptions>,
+  ) {
+    const path = this.getLayoutPath(options);
+    const content = await this.getTemplate(path, template, options);
+    return content;
+  }
 }
